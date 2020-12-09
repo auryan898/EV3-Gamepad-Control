@@ -1,0 +1,1 @@
+java -jar build/libs/ev3gamepad.jar
