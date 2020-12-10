@@ -12,6 +12,7 @@ import java.security.PrivilegedAction;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.auryan898.ev3gamepad.legacy.GameControllerLegacy;
 import com.google.common.io.Files;
 import com.simontuffs.onejar.Boot;
 
@@ -20,18 +21,47 @@ import net.java.games.input.ControllerEnvironment;
 
 public class TestJInput {
   static final CustomEV3GamepadLoader loader = new CustomEV3GamepadLoader();
+
   public static void main(String[] args) throws Exception {
-    Thread.currentThread().setContextClassLoader(loader);
-loadLibrary("jinput-dx8_64");
     
-//    Controller[] baseControllers = ControllerEnvironment.getDefaultEnvironment().getControllers();
-//    System.out.println(baseControllers.length);
+    // Thread.currentThread().setContextClassLoader(loader);
+    // loadLibrary("jinput-dx8_64");
+    // loader.loadClass(ControllerEnvironment.class.getCanonicalName());
+    // ControllerEnvironment.getDefaultEnvironment();
+
+    String osName = getPrivilegedProperty("os.name", "").trim();
+    String pluginClasses;
+    if (osName.equals("Linux")) {
+      loader.loadClass("net.java.games.input.LinuxEnvironmentPlugin");
+    } else if (osName.equals("Mac OS X")) {
+      loader.loadClass("net.java.games.input.OSXEnvironmentPlugin");
+    } else if (osName.equals("Windows XP") || osName.equals("Windows Vista")
+        || osName.equals("Windows 7")) {
+      loader.loadClass("net.java.games.input.DirectAndRawInputEnvironmentPlugin");
+    } else if (osName.equals("Windows 98") || osName.equals("Windows 2000")) {
+      loader.loadClass("net.java.games.input.DirectInputEnvironmentPlugin");
+    } else if (osName.startsWith("Windows")) {
+      loader.loadClass("net.java.games.input.DirectAndRawInputEnvironmentPlugin");
+    } else {
+      // nothing?
+    }
+    // GameControllerLegacy.main(args);
+    Controller[] baseControllers = ControllerEnvironment.getDefaultEnvironment().getControllers();
+    // System.out.println(baseControllers.length);
 
     // Boot.run(args);
     // int code = baseControllers[6].hashCode();
     // while (true) {
     //// baseControllers[6].poll();
     // }
+  }
+
+  static String getPrivilegedProperty(final String property, final String default_value) {
+    return (String) AccessController.doPrivileged(new PrivilegedAction() {
+      public Object run() {
+        return System.getProperty(property, default_value);
+      }
+    });
   }
 
   static void loadLibrary(final String lib_name) {
@@ -43,7 +73,7 @@ loadLibrary("jinput-dx8_64");
               System.load(lib_path + File.separator + System.mapLibraryName(lib_name));
             else {
               System.load(loader.findLibrary(lib_name));
-//              System.loadLibrary(lib_name);
+              // System.loadLibrary(lib_name);
             }
             return null;
           }
