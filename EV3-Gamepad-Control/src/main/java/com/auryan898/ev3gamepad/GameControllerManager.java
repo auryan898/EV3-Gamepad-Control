@@ -3,15 +3,55 @@ package com.auryan898.ev3gamepad;
 import java.util.*;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.locks.ReentrantLock;
+
+import com.auryan898.ev3gamepad.keymapping.DefaultKeyMapper;
 
 import net.java.games.input.Component;
 import net.java.games.input.Controller;
 import net.java.games.input.ControllerEnvironment;
 
 public class GameControllerManager implements Runnable {
+  
+  public static void main(String[] args) {
+    GameControllerManager manager = GameControllerManager.getInstance();
+    PhysicalGameController p = manager.getPhysicalController(0);
+    GameControllerDisplay d = new GameControllerDisplay();
+    d.create();
+    d.addController(manager.getPhysicalController(0));
+    d.show();
+    while (true) {
+      d.update();
+      p.update();
+      try {
+        Thread.sleep(100);
+      } catch (InterruptedException e) {
+        // TODO Auto-generated catch block
+        e.printStackTrace();
+      }
+    }
+    /*
+    manager.createAssignableControlller("Button 9");
+    
+    
+    while (true) {
+      // TODO Include periodic update
+      manager.update();
+      d.update();
+      try {
+        Thread.sleep(UPDATE_INTERVAL);
+      } catch (InterruptedException e) {
+        e.printStackTrace();
+        break;
+      }
+    }*/
+  }
+  
   private static GameControllerManager instance;
+  private ReentrantLock lock = new ReentrantLock();
+  private KeyMapper mainMapper = new DefaultKeyMapper();
 
-  public GameControllerManager getInstance() {
+  public static GameControllerManager getInstance() {
     if (instance == null)
       instance = new GameControllerManager();
 
@@ -30,6 +70,12 @@ public class GameControllerManager implements Runnable {
   private ConcurrentHashMap<String, AssignableGameController> assignedControllers = new ConcurrentHashMap<>();
   private ArrayList<Controller> baseGamepads = new ArrayList<>();
 
+  /**
+   * Sets interval for update thread to be at least 1 millisecond no matter what.
+   * 
+   * @param  interval
+   * @return
+   */
   public Long setUpdateIntervalMilliseconds(long interval) {
     UPDATE_INTERVAL = Math.max(1L, interval);
     return UPDATE_INTERVAL;
@@ -39,7 +85,7 @@ public class GameControllerManager implements Runnable {
   @Override
   public void run() {
     while (true) {
-      // TODO Include periodic update methods here
+      // TODO Include periodic update
       update();
       try {
         Thread.sleep(UPDATE_INTERVAL);
@@ -66,17 +112,22 @@ public class GameControllerManager implements Runnable {
    * @param  i
    * @return
    */
-  public AssignableGameController getAssignableController(String key) {
-    return assignedControllers.get(key);
+  public AssignableGameController getAssignableController(KeyMapper mapper, String... idKeys) {
+    return assignedControllers.get(mapper.concatenateKeys(idKeys));
   }
   
+  public AssignableGameController getAssignableController(String... idKeys) {
+    return assignedControllers.get(this.mainMapper.concatenateKeys(idKeys));
+  }
+
   /**
    * 
    * 
-   * @param key
+   * @param  key
    * @return
    */
-  public AssignableGameController createAssignableControlller(String key) { // TODO: Possible improvements, gamepadType, isValid key
+  public AssignableGameController createAssignableControlller(String key) {
+    // TODO: Possible improvements, gamepadType, isValid key
     AssignableGameController a = new AssignableGameController(physicalControllers);
     assignedControllers.put(key, a);
     return a;
@@ -99,18 +150,37 @@ public class GameControllerManager implements Runnable {
   }
 
   protected void updatePhysicalControllers() {
-    synchronized (physicalControllers) {
-      for (PhysicalGameController p : physicalControllers) {
-        p.update();
-      }
+    lock.lock();
+    for (PhysicalGameController p : physicalControllers) {
+      p.update();
     }
+    lock.unlock();
   }
 
   protected void updateAssignedControllers() {
-    synchronized (assignedControllers) {
-      for (Entry<String, AssignableGameController> a : assignedControllers.entrySet()) {
-        a.getValue().update();
+    lock.lock();
+    ArrayList<String[]> signatures = new ArrayList<>();
+
+    for (PhysicalGameController pController : physicalControllers) {
+      String signature = mainMapper.concatenateKeys(pController.getKeySignature());
+      if (assignedControllers.containsKey(signature)) {
+        AssignableGameController a = assignedControllers.get(signature);
+        a.unassign();
+        a.assign(pController);
       }
     }
+    lock.unlock();
+  }
+
+  public boolean unassign(PhysicalGameController pController) {
+    String key = pController.getIdKey();
+    if (assignedControllers.containsKey(key)) {
+      return assignedControllers.get(key).unassign();
+    }
+    return false;
+  }
+
+  public boolean assign(PhysicalGameController pController, AssignableGameController aController) {
+    return aController.assign(pController);
   }
 }
