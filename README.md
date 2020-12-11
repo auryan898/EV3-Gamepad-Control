@@ -14,7 +14,8 @@ The first thing you do in every situation is get the `GameControllerManager` ins
 
     GameControllerManager manager = GameControllerManager.getInstance();
 
-This is a singleton so it's always the same manager instance wherever you call this method.
+This is used to access gamepad controllers and update them too.  
+It's also a singleton so it's always the same manager instance wherever you call this method.
 
 ---
 
