@@ -9,10 +9,10 @@ import com.auryan898.ev3gamepad.KeyMapper;
 
 public class BaseGamepadKeyMapper extends DefaultKeyMapper {
   protected String[][] namedKeys = {
-      { "0", "a" },
-      { "1", "b" },
-      { "2", "x" },
-      { "3", "y" },
+      { "0", "a_button" },
+      { "1", "b_button" },
+      { "2", "x_button" },
+      { "3", "y_button" },
       { "4", "left_button" },
       { "5", "right_button" },
       { "6", "back" },

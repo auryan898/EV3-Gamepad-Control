@@ -9,6 +9,7 @@ public class AssignableGameController extends GameController {
   private PhysicalGameController physicalController;
   private KeyMapper mapper = new DefaultKeyMapper();
   private String idKey;
+  private String displayIdKey;
 
   AssignableGameController(KeyMapper mapper, String... keys) {
     if (mapper != null) {
@@ -35,6 +36,7 @@ public class AssignableGameController extends GameController {
 
   public String setIdKey(String... idKeys) {
     this.idKey = createIdKey(idKeys);
+    this.setDisplayIdKey(this.mapper.concatenateNamedKeys("+", idKeys));
     return this.idKey;
   }
 
@@ -45,6 +47,14 @@ public class AssignableGameController extends GameController {
   public boolean matchesIdKey(String... testKeys) {
     return this.idKey != null && testKeys != null
         && this.idKey.equals(this.mapper.concatenateKeys(testKeys));
+  }
+
+  public String getDisplayIdKey() {
+    return displayIdKey;
+  }
+
+  public void setDisplayIdKey(String displayIdKey) {
+    this.displayIdKey = displayIdKey;
   }
 
   /**
@@ -161,7 +171,7 @@ public class AssignableGameController extends GameController {
   }
 
   public String toString() {
-    return "ID: " + this.idKey + " | " + (physicalController != null
+    return "Player: " + this.displayIdKey + " | " + (physicalController != null
         ? physicalController.toString(this.mapper)
         : "");
   }

@@ -66,9 +66,13 @@ public abstract class KeyMapper {
       }
     }
     Collections.sort(keys); // always has the same order then
-    return String.join("+", keys);
+    return KeyMapper.join("+", keys);
   }
-  
+
+  public String concatenateNamedKeys(String... inputKeys) {
+    return concatenateNamedKeys("+", inputKeys);
+  }
+
   public String concatenateNamedKeys(String separator, String... inputKeys) {
     ArrayList<String> keys = new ArrayList<>();
     for (int i = 0; i < inputKeys.length; i++) {
@@ -79,9 +83,9 @@ public abstract class KeyMapper {
       }
     }
     Collections.sort(keys); // always has the same order then
-    return String.join("+", keys);
+    return KeyMapper.join("+", keys);
   }
-  
+
   public String concatenateAnyValues(String separator, String... inputs) {
     ArrayList<String> keys = new ArrayList<>();
     for (int i = 0; i < inputs.length; i++) {
@@ -91,7 +95,7 @@ public abstract class KeyMapper {
       }
     }
     Collections.sort(keys); // always has the same order then
-    return String.join("+", keys);
+    return KeyMapper.join("+", keys);
   }
 
   /**
@@ -149,5 +153,17 @@ public abstract class KeyMapper {
       result.add(this.getAnyKey(key));
     }
     return result;
+  }
+  
+  public static String join(String separator, Collection<String> strings) {
+    return join(separator, strings.toArray(new String[strings.size()]));
+  }
+
+  public static String join(String separator, String... strings) {
+    String res = "";
+    for (int i = 0; i < strings.length - 1; i++) {
+      res += strings[i] + separator;
+    }
+    return res + (strings.length > 0 ? strings[strings.length - 1] : "");
   }
 }

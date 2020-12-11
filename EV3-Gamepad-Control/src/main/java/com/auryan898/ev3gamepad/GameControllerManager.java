@@ -7,22 +7,44 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import com.auryan898.ev3gamepad.keymapping.BaseGamepadKeyMapper;
 import com.auryan898.ev3gamepad.keymapping.DefaultKeyMapper;
+import com.auryan898.ev3gamepad.CustomEV3GamepadLoader;
 
 import net.java.games.input.Component;
 import net.java.games.input.Controller;
 import net.java.games.input.ControllerEnvironment;
 
 public class GameControllerManager implements Runnable {
+  static final CustomEV3GamepadLoader loader = new CustomEV3GamepadLoader(
+      ControllerEnvironment.getDefaultEnvironment().getClass().getClassLoader());
+
+  static {
+    System.setProperty("net.java.games.input.librarypath", loader.getTempDir());
+  }
 
   public static void main(String[] args) {
     GameControllerManager manager = GameControllerManager.getInstance();
-    PhysicalGameController p = manager.getPhysicalController(0);
     GameControllerDisplay d = new GameControllerDisplay();
+
     d.create();
-    d.addController(p);
-    d.addController(manager.getAssignableController(new BaseGamepadKeyMapper(), "a","b"));
-    d.addController(manager.getAssignableController("2","3"));
     d.show();
+
+    String[] assigningKeys = {
+        "a_button",
+        "b_button",
+        "x_button",
+        "y_button",
+        "left_button",
+        "right_button" };
+    List<PhysicalGameController> conts = manager.getPhysicalControllers();
+    for (int i = 0; i < conts.size(); i++) {
+      d.addController(conts.get(i));
+    }
+    for (int i = 0; i < assigningKeys.length; i++) {
+      if (i < assigningKeys.length)
+        d.addController(
+            manager.getAssignableController(new BaseGamepadKeyMapper(), "start", assigningKeys[i]));
+    }
+
     while (true) {
       d.update();
       manager.update();
@@ -93,6 +115,10 @@ public class GameControllerManager implements Runnable {
     return physicalControllers.get(i);
   }
 
+  public List<PhysicalGameController> getPhysicalControllers() {
+    return Collections.unmodifiableList(physicalControllers);
+  }
+
   /**
    * Gets an assigned controller by it's determined key.
    * 
@@ -112,6 +138,10 @@ public class GameControllerManager implements Runnable {
 
   public AssignableGameController getAssignableController(String... idKeys) {
     return getAssignableController(this.mainMapper, idKeys);
+  }
+
+  public List<AssignableGameController> getAssignableControllers() {
+    return Collections.unmodifiableList(new ArrayList<>(assignedControllers.values()));
   }
 
   protected void loadPhysicalControllers() {
@@ -146,7 +176,7 @@ public class GameControllerManager implements Runnable {
       String signature = mainMapper.concatenateKeys(pController.getButtonSignature());
       if (assignedControllers.containsKey(signature)) {
         AssignableGameController a = assignedControllers.get(signature);
-        if (pController.getIdKey() != null) 
+        if (pController.getIdKey() != null)
           assignedControllers.get(pController.getIdKey()).unassign();
         a.unassign();
         a.assign(pController);
