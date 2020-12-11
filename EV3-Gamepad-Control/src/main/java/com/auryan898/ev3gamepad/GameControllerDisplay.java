@@ -42,6 +42,11 @@ public class GameControllerDisplay {
     BoxLayout box = new BoxLayout(frame.getContentPane(), BoxLayout.Y_AXIS);
     frame.setLayout(box);
   }
+  
+  public void init() {
+    create();
+    show();
+  }
 
   public void update() {
     // TODO: fill in with update code
