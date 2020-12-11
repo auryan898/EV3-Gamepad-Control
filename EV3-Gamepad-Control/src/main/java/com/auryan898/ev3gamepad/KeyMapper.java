@@ -57,7 +57,7 @@ public abstract class KeyMapper {
   public String concatenateKeys(String separator, String... inputKeys) {
     ArrayList<String> keys = new ArrayList<>();
     for (int i = 0; i < inputKeys.length; i++) {
-      if (inputKeys[i] != null || inputKeys[i] != "NONE" || inputKeys[i] != "")
+      if (inputKeys[i] != null && inputKeys[i] != "NONE" && inputKeys[i] != "")
         keys.add(this.getControllerKey(inputKeys[i]));
     }
     Collections.sort(keys); // always has the same order then
@@ -80,4 +80,8 @@ public abstract class KeyMapper {
     }
     return res;
   }
+
+  protected abstract ArrayList<String> getAxisKeys();
+
+  protected abstract ArrayList<String> getButtonKeys();
 }

@@ -10,8 +10,18 @@ public class AssignableGameController extends GameController {
   private KeyMapper mapper = new DefaultKeyMapper();
   private String idKey;
 
-  AssignableGameController(List<PhysicalGameController> physicalControllers) {
-    // TODO Auto-generated constructor stub
+  AssignableGameController(KeyMapper mapper, String... keys) {
+    if (mapper != null) {
+      this.mapper = mapper;
+    }
+    setIdKey(keys);
+  }
+
+  AssignableGameController(KeyMapper mapper, String id) {
+    if (mapper != null) {
+      this.mapper = mapper;
+    }
+    this.idKey = id;
   }
 
   public void setKeyMapper(KeyMapper mapper) {
@@ -23,7 +33,7 @@ public class AssignableGameController extends GameController {
     // TODO implement controller deciding which controller to listen to
   }
 
-  public String saveIdKey(String... idKeys) {
+  public String setIdKey(String... idKeys) {
     this.idKey = createIdKey(idKeys);
     return this.idKey;
   }
@@ -97,29 +107,60 @@ public class AssignableGameController extends GameController {
 
   @Override
   public String[] getKeySignature() {
-    // TODO Auto-generated method stub
+    if (physicalController != null)
+      return physicalController.getKeySignature();
     return null;
   }
 
   @Override
   public String[] getNamedKeySignature() {
-    // TODO Auto-generated method stub
+    return getNamedKeySignature(this.mapper);
+  }
+
+  @Override
+  public String[] getNamedKeySignature(KeyMapper mapper) {
+    if (physicalController != null)
+      return physicalController.getNamedKeySignature(mapper);
     return null;
   }
 
   @Override
   public DirectionalKey getDirectional(String key) {
-    // TODO Auto-generated method stub
+    if (physicalController != null)
+      return physicalController.getDirectional(key);
     return null;
   }
 
   @Override
   public DirectionalKey getDirectional(String key, float threshold) {
-    // TODO Auto-generated method stub
+    if (physicalController != null)
+      return physicalController.getDirectional(key, threshold);
     return null;
   }
 
-  // TODO create assignedController delegate functions that return null when
-  // assignedController is null
+  public KeyMapper getMapper() {
+    return mapper;
+  }
 
+  public void setMapper(KeyMapper mapper) {
+    this.mapper = mapper;
+  }
+
+  public String toString() {
+    return physicalController != null ? physicalController.toString() : "";
+  }
+
+  @Override
+  public String[] getButtonSignature() {
+    if (physicalController != null)
+      return physicalController.getButtonSignature();
+    return null;
+  }
+
+  @Override
+  public String[] getButtonSignature(KeyMapper mapper) {
+    if (physicalController != null)
+      return physicalController.getButtonSignature(mapper);
+    return null;
+  }
 }

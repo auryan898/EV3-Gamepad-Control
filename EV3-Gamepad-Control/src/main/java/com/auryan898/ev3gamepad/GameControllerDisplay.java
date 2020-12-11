@@ -1,5 +1,6 @@
 package com.auryan898.ev3gamepad;
 
+import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -45,9 +46,9 @@ public class GameControllerDisplay {
   public void update() {
     // TODO: fill in with update code
     for (int i = 0; i < controllers.size() && i < labels.size(); i++) {
-      labels.get(i).setText("<html>" + controllers.get(i).toString() + "</html>");
+      labels.get(i).setText("<html>" + controllers.get(i).toString() + "<br></html>");
     }
-    frame.pack();
+//    frame.pack();
     frame.update(frame.getGraphics());
   }
 

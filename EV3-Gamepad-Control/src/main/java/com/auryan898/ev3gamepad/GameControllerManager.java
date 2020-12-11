@@ -12,41 +12,27 @@ import net.java.games.input.Controller;
 import net.java.games.input.ControllerEnvironment;
 
 public class GameControllerManager implements Runnable {
-  
+
   public static void main(String[] args) {
     GameControllerManager manager = GameControllerManager.getInstance();
     PhysicalGameController p = manager.getPhysicalController(0);
     GameControllerDisplay d = new GameControllerDisplay();
     d.create();
-    d.addController(manager.getPhysicalController(0));
+    d.addController(p);
+    d.addController(manager.getAssignableController("0","1"));
+    d.addController(manager.getAssignableController("2","3"));
     d.show();
     while (true) {
       d.update();
-      p.update();
+      manager.update();
       try {
         Thread.sleep(100);
       } catch (InterruptedException e) {
-        // TODO Auto-generated catch block
         e.printStackTrace();
       }
     }
-    /*
-    manager.createAssignableControlller("Button 9");
-    
-    
-    while (true) {
-      // TODO Include periodic update
-      manager.update();
-      d.update();
-      try {
-        Thread.sleep(UPDATE_INTERVAL);
-      } catch (InterruptedException e) {
-        e.printStackTrace();
-        break;
-      }
-    }*/
   }
-  
+
   private static GameControllerManager instance;
   private ReentrantLock lock = new ReentrantLock();
   private KeyMapper mainMapper = new DefaultKeyMapper();
@@ -113,24 +99,18 @@ public class GameControllerManager implements Runnable {
    * @return
    */
   public AssignableGameController getAssignableController(KeyMapper mapper, String... idKeys) {
-    return assignedControllers.get(mapper.concatenateKeys(idKeys));
-  }
-  
-  public AssignableGameController getAssignableController(String... idKeys) {
-    return assignedControllers.get(this.mainMapper.concatenateKeys(idKeys));
+    String id = mapper.concatenateKeys(idKeys);
+    if (assignedControllers.containsKey(id)) {
+      return assignedControllers.get(id);
+    }
+
+    AssignableGameController a = new AssignableGameController(mapper, idKeys);
+    assignedControllers.put(id, a);
+    return a;
   }
 
-  /**
-   * 
-   * 
-   * @param  key
-   * @return
-   */
-  public AssignableGameController createAssignableControlller(String key) {
-    // TODO: Possible improvements, gamepadType, isValid key
-    AssignableGameController a = new AssignableGameController(physicalControllers);
-    assignedControllers.put(key, a);
-    return a;
+  public AssignableGameController getAssignableController(String... idKeys) {
+    return getAssignableController(this.mainMapper, idKeys);
   }
 
   protected void loadPhysicalControllers() {
@@ -162,9 +142,11 @@ public class GameControllerManager implements Runnable {
     ArrayList<String[]> signatures = new ArrayList<>();
 
     for (PhysicalGameController pController : physicalControllers) {
-      String signature = mainMapper.concatenateKeys(pController.getKeySignature());
+      String signature = mainMapper.concatenateKeys(pController.getButtonSignature());
       if (assignedControllers.containsKey(signature)) {
         AssignableGameController a = assignedControllers.get(signature);
+        if (pController.getIdKey() != null) 
+          assignedControllers.get(pController.getIdKey()).unassign();
         a.unassign();
         a.assign(pController);
       }

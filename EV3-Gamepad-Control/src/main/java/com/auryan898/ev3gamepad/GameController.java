@@ -19,4 +19,12 @@ public abstract class GameController {
   public abstract String[] getKeySignature();
 
   public abstract String[] getNamedKeySignature();
+  
+  public abstract String[] getNamedKeySignature(KeyMapper mapper);
+  
+  public abstract String[] getButtonSignature();
+  
+  public abstract String[] getButtonSignature(KeyMapper mapper);
+  
+  public abstract KeyMapper getMapper();
 }
