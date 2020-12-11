@@ -15,7 +15,6 @@ import java.util.List;
 import com.auryan898.ev3gamepad.CustomEV3GamepadLoader;
 import com.auryan898.ev3gamepad.legacy.GameControllerLegacy;
 import com.google.common.io.Files;
-import com.simontuffs.onejar.Boot;
 
 import net.java.games.input.Controller;
 import net.java.games.input.ControllerEnvironment;
