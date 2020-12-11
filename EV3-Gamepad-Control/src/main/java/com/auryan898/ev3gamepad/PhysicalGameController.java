@@ -1,12 +1,14 @@
 package com.auryan898.ev3gamepad;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.HashMap;
 import java.util.Map.Entry;
 import java.util.Set;
 
 import org.apache.commons.math3.random.ValueServer;
 
+import com.auryan898.ev3gamepad.keymapping.BaseGamepadKeyMapper;
 import com.auryan898.ev3gamepad.keymapping.DefaultKeyMapper;
 
 import net.java.games.input.Component;
@@ -20,7 +22,7 @@ public class PhysicalGameController extends GameController {
   private HashMap<String, Component> inputValues = new HashMap<>();
   private KeyMapper mapper = new DefaultKeyMapper();
   private float defaultDeadzone;
-  
+
   PhysicalGameController(Controller controller) {
     this(controller, DEFAULT_DEADZONE);
   }
@@ -57,31 +59,37 @@ public class PhysicalGameController extends GameController {
 
   @Override
   public Float getValue(String key) {
+    key = mapper.getControllerKey(key);
     return inputValues.get(key).getPollData();
   }
 
   public Float getDeadzone(String key) {
+    key = mapper.getControllerKey(key);
     float deadzone = inputValues.get(key).getDeadZone();
     return deadzone >= 0.99f || deadzone <= 0f ? this.defaultDeadzone : deadzone;
   }
 
   @Override
   public Boolean getBoolean(String key) {
+    key = mapper.getControllerKey(key);
     return getBoolean(key, getDeadzone(key));
   }
 
   @Override
   public Boolean getBoolean(String key, float threshold) {
+    key = mapper.getControllerKey(key);
     return Math.abs(getValue(key)) > threshold;
   }
 
   @Override
   public DirectionalKey getDirectional(String key) {
+    key = mapper.getControllerKey(key);
     return getDirectional(key, this.defaultDeadzone);
   }
 
   @Override
   public DirectionalKey getDirectional(String key, float threshold) {
+    key = mapper.getControllerKey(key);
     Float value = Math.abs(getValue(key));
 
     int code = (int) (float) (value * 8 + 0.001);
@@ -95,17 +103,17 @@ public class PhysicalGameController extends GameController {
   public String[] getNamedKeySignature() {
     return getNamedKeySignature(this.mapper);
   }
-  
+
   public String[] getNamedKeySignature(KeyMapper mapper) {
     return getNamedKeySignature(mapper, new ArrayList<String>());
   }
 
-  public String[] getNamedKeySignature(KeyMapper mapper, ArrayList<String> exclusions) {
+  public String[] getNamedKeySignature(KeyMapper mapper, List<String> exclusions) {
     String[] signature = new String[inputValues.size()];
     int i = 0;
     for (String key : inputValues.keySet()) {
       String displayKey = mapper.getNamedKey(key);
-      signature[i] = !exclusions.contains(displayKey) && getBoolean(key) ? displayKey : null;
+      signature[i] = !exclusions.contains(key) && getBoolean(key) ? displayKey : null;
       i++;
     }
     return signature;
@@ -115,20 +123,28 @@ public class PhysicalGameController extends GameController {
   public String[] getButtonSignature() {
     return getNamedKeySignature(this.mapper, this.mapper.getAxisKeys());
   }
-  
+
   @Override
   public String[] getButtonSignature(KeyMapper mapper) {
     return getNamedKeySignature(mapper, mapper.getAxisKeys());
   }
 
+  public String getName() {
+    return controller.toString();
+  }
+  
   public String toString() {
-    String[] keyValues = getNamedKeySignature(this.mapper);
-    for (int i = 0; i< keyValues.length; i++) {
+    return toString(this.mapper);
+  }
+
+  public String toString(KeyMapper mapper) {
+    String[] keyValues = this.getKeySignature();
+    for (int i = 0; i < keyValues.length; i++) {
       if (keyValues[i] != null)
-        keyValues[i] = keyValues[i] + ":" + getValue(keyValues[i]);
+        keyValues[i] = mapper.getNamedKey(keyValues[i]) + ":" + this.getValue(keyValues[i]);
     }
     return controller.toString() + " | "
-        + mapper.concatenateKeys(", ", keyValues);
+        + mapper.concatenateAnyValues(", ", keyValues);
   }
 
 }

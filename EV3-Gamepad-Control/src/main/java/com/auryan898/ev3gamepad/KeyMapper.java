@@ -1,7 +1,9 @@
 package com.auryan898.ev3gamepad;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 
@@ -57,8 +59,36 @@ public abstract class KeyMapper {
   public String concatenateKeys(String separator, String... inputKeys) {
     ArrayList<String> keys = new ArrayList<>();
     for (int i = 0; i < inputKeys.length; i++) {
-      if (inputKeys[i] != null && inputKeys[i] != "NONE" && inputKeys[i] != "")
-        keys.add(this.getControllerKey(inputKeys[i]));
+      if (inputKeys[i] != null && inputKeys[i] != "NONE" && inputKeys[i] != "") {
+        String e = this.getControllerKey(inputKeys[i]);
+        if (e != null)
+          keys.add(e);
+      }
+    }
+    Collections.sort(keys); // always has the same order then
+    return String.join("+", keys);
+  }
+  
+  public String concatenateNamedKeys(String separator, String... inputKeys) {
+    ArrayList<String> keys = new ArrayList<>();
+    for (int i = 0; i < inputKeys.length; i++) {
+      if (inputKeys[i] != null && inputKeys[i] != "NONE" && inputKeys[i] != "") {
+        String e = this.getNamedKey(inputKeys[i]);
+        if (e != null)
+          keys.add(e);
+      }
+    }
+    Collections.sort(keys); // always has the same order then
+    return String.join("+", keys);
+  }
+  
+  public String concatenateAnyValues(String separator, String... inputs) {
+    ArrayList<String> keys = new ArrayList<>();
+    for (int i = 0; i < inputs.length; i++) {
+      if (inputs[i] != null && inputs[i] != "") {
+        String e = inputs[i];
+        keys.add(e);
+      }
     }
     Collections.sort(keys); // always has the same order then
     return String.join("+", keys);
@@ -71,17 +101,53 @@ public abstract class KeyMapper {
    * @param  keys
    * @return
    */
-  public static HashMap<String, String> generateMapFromKeys(String[][] keys) {
+  public static HashMap<String, String> generateMapFromKeys(String[][] keys, boolean isReversed) {
     HashMap<String, String> res = new HashMap<>();
     for (String[] sub : keys) {
       if (sub.length >= 2 && sub[0] != null && sub[1] != null) {
-        res.put(sub[0], sub[1]);
+        if (isReversed) {
+          res.put(sub[1], sub[0]);
+        } else {
+          res.put(sub[0], sub[1]);
+        }
       }
     }
     return res;
   }
 
-  protected abstract ArrayList<String> getAxisKeys();
+  public static HashMap<String, String> generateMapFromKeys(String[][] keys) {
+    return generateMapFromKeys(keys, false);
+  }
 
-  protected abstract ArrayList<String> getButtonKeys();
+  public abstract List<String> getAxisKeys();
+
+  public abstract List<String> getButtonKeys();
+
+  public abstract List<String> getNamedAxisKeys();
+
+  public abstract List<String> getNamedButtonKeys();
+
+  public ArrayList<String> convertListToNamedKeys(Collection<String> inputKeys) {
+    ArrayList<String> result = new ArrayList<>();
+    for (String key : inputKeys) {
+      result.add(this.getNamedKey(key));
+    }
+    return result;
+  }
+
+  public ArrayList<String> convertListToControllerKeys(Collection<String> inputKeys) {
+    ArrayList<String> result = new ArrayList<>();
+    for (String key : inputKeys) {
+      result.add(this.getControllerKey(key));
+    }
+    return result;
+  }
+
+  public ArrayList<String> convertListToOther(List<String> inputKeys) {
+    ArrayList<String> result = new ArrayList<>();
+    for (String key : inputKeys) {
+      result.add(this.getAnyKey(key));
+    }
+    return result;
+  }
 }

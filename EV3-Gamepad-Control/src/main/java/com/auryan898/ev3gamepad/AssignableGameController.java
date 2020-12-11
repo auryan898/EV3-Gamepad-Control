@@ -87,21 +87,21 @@ public class AssignableGameController extends GameController {
   @Override
   public Float getValue(String key) {
     if (physicalController != null)
-      return physicalController.getValue(key);
+      return physicalController.getValue(mapper.getControllerKey(key));
     return null;
   }
 
   @Override
   public Boolean getBoolean(String key) {
     if (physicalController != null)
-      return physicalController.getBoolean(key);
+      return physicalController.getBoolean(mapper.getControllerKey(key));
     return null;
   }
 
   @Override
   public Boolean getBoolean(String key, float threshold) {
     if (physicalController != null)
-      return physicalController.getBoolean(key, threshold);
+      return physicalController.getBoolean(mapper.getControllerKey(key), threshold);
     return null;
   }
 
@@ -127,14 +127,14 @@ public class AssignableGameController extends GameController {
   @Override
   public DirectionalKey getDirectional(String key) {
     if (physicalController != null)
-      return physicalController.getDirectional(key);
+      return physicalController.getDirectional(mapper.getControllerKey(key));
     return null;
   }
 
   @Override
   public DirectionalKey getDirectional(String key, float threshold) {
     if (physicalController != null)
-      return physicalController.getDirectional(key, threshold);
+      return physicalController.getDirectional(mapper.getControllerKey(key), threshold);
     return null;
   }
 
@@ -144,10 +144,6 @@ public class AssignableGameController extends GameController {
 
   public void setMapper(KeyMapper mapper) {
     this.mapper = mapper;
-  }
-
-  public String toString() {
-    return physicalController != null ? physicalController.toString() : "";
   }
 
   @Override
@@ -162,5 +158,11 @@ public class AssignableGameController extends GameController {
     if (physicalController != null)
       return physicalController.getButtonSignature(mapper);
     return null;
+  }
+
+  public String toString() {
+    return "ID: " + this.idKey + " | " + (physicalController != null
+        ? physicalController.toString(this.mapper)
+        : "");
   }
 }

@@ -20,31 +20,45 @@ import net.java.games.input.Controller;
 import net.java.games.input.ControllerEnvironment;
 
 public class TestJInput {
-  static final CustomEV3GamepadLoader loader = new CustomEV3GamepadLoader();
+  static final CustomEV3GamepadLoader loader = new CustomEV3GamepadLoader(ControllerEnvironment.getDefaultEnvironment().getClass().getClassLoader());
 
+  @SuppressWarnings("unchecked")
   public static void main(String[] args) throws Exception {
-    
+
     // Thread.currentThread().setContextClassLoader(loader);
     // loadLibrary("jinput-dx8_64");
     // loader.loadClass(ControllerEnvironment.class.getCanonicalName());
     // ControllerEnvironment.getDefaultEnvironment();
+    System.out.println(ControllerEnvironment.getDefaultEnvironment().getClass().getClassLoader());
+    System.out.println(loader);
+    System.out.println(loader.getParent());
+    AccessController.doPrivileged(
+        new PrivilegedAction() {
+          public final Object run() {
+            String osName = getPrivilegedProperty("os.name", "").trim();
+            try {
+              if (osName.equals("Linux")) {
+                loader.loadClass("net.java.games.input.LinuxEnvironmentPlugin");
+              } else if (osName.equals("Mac OS X")) {
+                loader.loadClass("net.java.games.input.OSXEnvironmentPlugin");
+              } else if (osName.equals("Windows XP") || osName.equals("Windows Vista")
+                  || osName.equals("Windows 7")) {
+                loader.loadClass("net.java.games.input.DirectAndRawInputEnvironmentPlugin");
+              } else if (osName.equals("Windows 98") || osName.equals("Windows 2000")) {
+                loader.loadClass("net.java.games.input.DirectInputEnvironmentPlugin");
+              } else if (osName.startsWith("Windows")) {
+                loader.loadClass("net.java.games.input.DirectAndRawInputEnvironmentPlugin");
+              } else {
+                // nothing?
+              }
+            } catch (ClassNotFoundException e) {
+              // TODO Auto-generated catch block
+              e.printStackTrace();
+            }
+            return null;
+          }
+        });
 
-    String osName = getPrivilegedProperty("os.name", "").trim();
-    String pluginClasses;
-    if (osName.equals("Linux")) {
-      loader.loadClass("net.java.games.input.LinuxEnvironmentPlugin");
-    } else if (osName.equals("Mac OS X")) {
-      loader.loadClass("net.java.games.input.OSXEnvironmentPlugin");
-    } else if (osName.equals("Windows XP") || osName.equals("Windows Vista")
-        || osName.equals("Windows 7")) {
-      loader.loadClass("net.java.games.input.DirectAndRawInputEnvironmentPlugin");
-    } else if (osName.equals("Windows 98") || osName.equals("Windows 2000")) {
-      loader.loadClass("net.java.games.input.DirectInputEnvironmentPlugin");
-    } else if (osName.startsWith("Windows")) {
-      loader.loadClass("net.java.games.input.DirectAndRawInputEnvironmentPlugin");
-    } else {
-      // nothing?
-    }
     // GameControllerLegacy.main(args);
     Controller[] baseControllers = ControllerEnvironment.getDefaultEnvironment().getControllers();
     // System.out.println(baseControllers.length);
@@ -85,8 +99,8 @@ class CustomEV3GamepadLoader extends ClassLoader {
   private static final int TEMP_DIR_ATTEMPTS = 10000;
   File tempDir;
 
-  public CustomEV3GamepadLoader() {
-    super();
+  public CustomEV3GamepadLoader(ClassLoader parent) {
+    super(parent);
     this.tempDir = createTempDir(); // create temp directory
     copyResToTemp(); // fill temp directory with library files from resources
   }

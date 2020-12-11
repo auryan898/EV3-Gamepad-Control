@@ -1,7 +1,9 @@
 package com.auryan898.ev3gamepad.keymapping;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Arrays;
+import java.util.Collections;
 
 import com.auryan898.ev3gamepad.KeyMapper;
 
@@ -12,14 +14,17 @@ import com.auryan898.ev3gamepad.KeyMapper;
  *
  */
 public class DefaultKeyMapper extends KeyMapper {
-  private ArrayList<String> axisKeys = new ArrayList<String>();
-  private ArrayList<String> buttonKeys = new ArrayList<String>();
+  protected List<String> axisKeys = new ArrayList<String>();
+  protected List<String> buttonKeys = new ArrayList<String>();
 
   public DefaultKeyMapper() {
     axisKeys.addAll(Arrays.asList("x", "y", "rx", "ry", "z", "rz"));
     for (int i = 0; i < 20; i++) {
       buttonKeys.add(i + "");
     }
+
+    axisKeys = Collections.unmodifiableList(axisKeys);
+    buttonKeys = Collections.unmodifiableList(buttonKeys);
   }
 
   @Override
@@ -38,13 +43,23 @@ public class DefaultKeyMapper extends KeyMapper {
   }
 
   @Override
-  protected ArrayList<String> getAxisKeys() {
+  public List<String> getAxisKeys() {
     return axisKeys;
   }
 
   @Override
-  protected ArrayList<String> getButtonKeys() {
+  public List<String> getButtonKeys() {
     return buttonKeys;
+  }
+
+  @Override
+  public List<String> getNamedAxisKeys() {
+    return getAxisKeys();
+  }
+
+  @Override
+  public List<String> getNamedButtonKeys() {
+    return getButtonKeys();
   }
 
 }

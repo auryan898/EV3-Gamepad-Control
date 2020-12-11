@@ -5,6 +5,7 @@ import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.ReentrantLock;
 
+import com.auryan898.ev3gamepad.keymapping.BaseGamepadKeyMapper;
 import com.auryan898.ev3gamepad.keymapping.DefaultKeyMapper;
 
 import net.java.games.input.Component;
@@ -19,7 +20,7 @@ public class GameControllerManager implements Runnable {
     GameControllerDisplay d = new GameControllerDisplay();
     d.create();
     d.addController(p);
-    d.addController(manager.getAssignableController("0","1"));
+    d.addController(manager.getAssignableController(new BaseGamepadKeyMapper(), "a","b"));
     d.addController(manager.getAssignableController("2","3"));
     d.show();
     while (true) {
