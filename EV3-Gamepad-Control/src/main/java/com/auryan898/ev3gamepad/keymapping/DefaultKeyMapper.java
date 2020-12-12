@@ -16,15 +16,20 @@ import com.auryan898.ev3gamepad.KeyMapper;
 public class DefaultKeyMapper extends KeyMapper {
   protected List<String> axisKeys = new ArrayList<String>();
   protected List<String> buttonKeys = new ArrayList<String>();
+  protected List<String> allKeys = new ArrayList<String>();
 
   public DefaultKeyMapper() {
-    axisKeys.addAll(Arrays.asList("x", "y", "rx", "ry", "z", "rz"));
-    for (int i = 0; i < 20; i++) {
+    axisKeys.addAll(Arrays.asList("x", "y", "rx", "ry", "z"));
+    for (int i = 0; i <= 9; i++) {
       buttonKeys.add(i + "");
     }
+    buttonKeys.add("pov");
 
     axisKeys = Collections.unmodifiableList(axisKeys);
     buttonKeys = Collections.unmodifiableList(buttonKeys);
+    allKeys.addAll(axisKeys);
+    allKeys.addAll(buttonKeys);
+    allKeys = Collections.unmodifiableList(allKeys);
   }
 
   @Override
@@ -60,6 +65,17 @@ public class DefaultKeyMapper extends KeyMapper {
   @Override
   public List<String> getNamedButtonKeys() {
     return getButtonKeys();
+  }
+
+  @Override
+  public List<String> getAllControllerKeys() {
+    return allKeys;
+  }
+
+  @Override
+  public List<String> getAllNamedKeys() {
+    // TODO Auto-generated method stub
+    return getAllControllerKeys();
   }
 
 }

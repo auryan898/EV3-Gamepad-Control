@@ -155,7 +155,7 @@ public class GameControllerManager implements Runnable {
     }
   }
 
-  protected void update() {
+  public void update() {
     updatePhysicalControllers();
     updateAssignedControllers();
   }

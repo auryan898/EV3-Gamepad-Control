@@ -93,5 +93,15 @@ public class BaseGamepadKeyMapper extends DefaultKeyMapper {
   @Override
   public List<String> getNamedButtonKeys() {
     return namedButtonKeys;
-  }  
+  }
+  
+  @Override
+  public List<String> getAllControllerKeys() {
+    return new ArrayList<String>(controllerToNamedKeys.keySet());
+  }
+
+  @Override
+  public List<String> getAllNamedKeys() {
+    return new ArrayList<String>(namedToControllerKeys.keySet());
+  }
 }

@@ -60,13 +60,22 @@ public class PhysicalGameController extends GameController {
   @Override
   public Float getValue(String key) {
     key = mapper.getControllerKey(key);
-    return inputValues.get(key).getPollData();
+    Component c = inputValues.get(key);
+    if (c != null)
+      return c.getPollData();
+    else
+      return null;
   }
 
   public Float getDeadzone(String key) {
     key = mapper.getControllerKey(key);
-    float deadzone = inputValues.get(key).getDeadZone();
-    return deadzone >= 0.99f || deadzone <= 0f ? this.defaultDeadzone : deadzone;
+    Component c = inputValues.get(key);
+    if (c != null) {
+      float deadzone = c.getDeadZone();
+      return deadzone >= 0.99f || deadzone <= 0f ? this.defaultDeadzone : deadzone;
+    } else {
+      return null;
+    }
   }
 
   @Override
@@ -132,7 +141,7 @@ public class PhysicalGameController extends GameController {
   public String getName() {
     return controller.toString();
   }
-  
+
   public String toString() {
     return toString(this.mapper);
   }

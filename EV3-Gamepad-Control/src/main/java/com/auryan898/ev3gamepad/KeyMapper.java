@@ -166,4 +166,8 @@ public abstract class KeyMapper {
     }
     return res + (strings.length > 0 ? strings[strings.length - 1] : "");
   }
+  
+  public abstract List<String> getAllControllerKeys();
+  
+  public abstract List<String> getAllNamedKeys();
 }
